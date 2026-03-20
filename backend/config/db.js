@@ -1,10 +1,10 @@
-const mysql = require("mysql2/promise");
+const { Pool } = require("pg");
 
-const db = mysql.createPool({
-host:"localhost",
-user:"root",
-password:"222426",
-database:"fresh_market"
+const pool = new Pool({
+  connectionString: process.env.postgresql://root:uJNauMKOtRIPKXBpaaKnFehDfCJkJBaz@dpg-d6uivrq4d50c73f5kb8g-a.oregon-postgres.render.com/fresh_market_fxfg,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
-module.exports = db;
+module.exports = pool;
