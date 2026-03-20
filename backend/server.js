@@ -6,13 +6,15 @@ const productRoutes = require("./routes/productRoutes");
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "https://freshmartshop.netlify.app",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: "https://freshmartshop.netlify.app",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.use(express.json());
 
@@ -22,8 +24,15 @@ app.get("/", (req, res) => {
 
 app.use("/api/products", productRoutes);
 
-const PORT = process.env.PORT || 5000;
+app.use((err, req, res, next) => {
+  console.error("Unhandled server error:", err);
+  res.status(500).json({
+    success: false,
+    message: err.message || "Internal server error",
+  });
+});
 
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
