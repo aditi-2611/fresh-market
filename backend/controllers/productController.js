@@ -1,6 +1,6 @@
 const db = require("../config/db");
 
-const BASE_URL = process.env.BASE_URL || "https://fresh-market-backend.onrender.com";
+const BASE_URL = process.env.BASE_URL || "https://fresh-market-jr0o.onrender.com";
 
 exports.getProducts = async (req, res) => {
   try {
@@ -8,15 +8,18 @@ exports.getProducts = async (req, res) => {
 
     let query = "SELECT * FROM products WHERE 1=1";
     const values = [];
+    let index = 1;
 
     if (category) {
-      query += " AND category = ?";
+      query += ` AND category = $${index}`;
       values.push(category);
+      index++;
     }
 
     if (search) {
-      query += " AND name LIKE ?";
+      query += ` AND name ILIKE $${index}`;
       values.push(`%${search}%`);
+      index++;
     }
 
     if (sort === "asc") {
@@ -25,11 +28,13 @@ exports.getProducts = async (req, res) => {
       query += " ORDER BY price DESC";
     }
 
-    const [products] = await db.execute(query, values);
+    const result = await db.query(query, values);
 
-    const updatedProducts = products.map((product) => ({
+    const updatedProducts = result.rows.map((product) => ({
       ...product,
-      image: `${BASE_URL}/uploads/${product.image}`,
+      image: product.image
+        ? `${BASE_URL}/uploads/${product.image}`
+        : null,
     }));
 
     res.status(200).json({
@@ -41,7 +46,7 @@ exports.getProducts = async (req, res) => {
     console.error("Error fetching products:", error);
     res.status(500).json({
       success: false,
-      message: "Server error while fetching products",
+      message: error.message,
     });
   }
 };
@@ -50,14 +55,16 @@ exports.getProductsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
 
-    const [products] = await db.execute(
-      "SELECT * FROM products WHERE category = ?",
+    const result = await db.query(
+      "SELECT * FROM products WHERE category = $1",
       [category]
     );
 
-    const updatedProducts = products.map((product) => ({
+    const updatedProducts = result.rows.map((product) => ({
       ...product,
-      image: `${BASE_URL}/uploads/${product.image}`,
+      image: product.image
+        ? `${BASE_URL}/uploads/${product.image}`
+        : null,
     }));
 
     res.status(200).json({
@@ -70,7 +77,7 @@ exports.getProductsByCategory = async (req, res) => {
     console.error("Error fetching category products:", error);
     res.status(500).json({
       success: false,
-      message: "Server error while fetching category products",
+      message: error.message,
     });
   }
 };
@@ -79,9 +86,12 @@ exports.getSingleProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [rows] = await db.execute("SELECT * FROM products WHERE id = ?", [id]);
+    const result = await db.query(
+      "SELECT * FROM products WHERE id = $1",
+      [id]
+    );
 
-    if (rows.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Product not found",
@@ -89,8 +99,10 @@ exports.getSingleProduct = async (req, res) => {
     }
 
     const product = {
-      ...rows[0],
-      image: `${BASE_URL}/uploads/${rows[0].image}`,
+      ...result.rows[0],
+      image: result.rows[0].image
+        ? `${BASE_URL}/uploads/${result.rows[0].image}`
+        : null,
     };
 
     res.status(200).json({
@@ -101,7 +113,7 @@ exports.getSingleProduct = async (req, res) => {
     console.error("Error fetching product:", error);
     res.status(500).json({
       success: false,
-      message: "Server error while fetching single product",
+      message: error.message,
     });
   }
 };
