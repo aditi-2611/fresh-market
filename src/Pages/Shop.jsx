@@ -1,57 +1,75 @@
-import { useState, useContext } from "react";
-import products from "../Data/products";
+import { useState, useContext, useEffect } from "react";
 import ProductCard from "../Components/ProductCard";
 import { CartContext } from "../Context/CartContext";
 
 function Shop() {
   const { searchQuery } = useContext(CartContext);
 
+  const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortOption, setSortOption] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const categories = ["All", "Fruits", "Dairy", "Bakery"];
 
-  let filteredProducts = products;
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-  // 🔎 SEARCH FILTER
-  if (searchQuery) {
-    filteredProducts = filteredProducts.filter((product) =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }
+        let url = "http://localhost:5000/api/products";
+        const params = new URLSearchParams();
 
-  // 🏷 CATEGORY FILTER
-  if (selectedCategory !== "All") {
-    filteredProducts = filteredProducts.filter(
-      (product) => product.category === selectedCategory
-    );
-  }
+        if (selectedCategory !== "All") {
+          params.append("category", selectedCategory);
+        }
 
-  // 💰 SORTING
-  if (sortOption === "low") {
-    filteredProducts = [...filteredProducts].sort(
-      (a, b) => a.price - b.price
-    );
-  }
+        if (sortOption === "low") {
+          params.append("sort", "asc");
+        } else if (sortOption === "high") {
+          params.append("sort", "desc");
+        }
 
-  if (sortOption === "high") {
-    filteredProducts = [...filteredProducts].sort(
-      (a, b) => b.price - a.price
-    );
-  }
+        if (searchQuery) {
+          params.append("search", searchQuery);
+        }
+
+        const finalUrl = params.toString() ? `${url}?${params.toString()}` : url;
+
+        const response = await fetch(finalUrl);
+        const data = await response.json();
+        console.log(data)
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to fetch products");
+        }
+
+        setProducts(data.products || []);
+      } catch (err) {
+        setError(err.message || "Something went wrong");
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [selectedCategory, sortOption, searchQuery]);
 
   return (
     <div className="container">
       <h2>Shop Products</h2>
 
-      {/* Filters */}
       <div style={{ marginBottom: "20px", display: "flex", gap: "20px" }}>
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
         >
           {categories.map((cat) => (
-            <option key={cat}>{cat}</option>
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
           ))}
         </select>
 
@@ -65,13 +83,18 @@ function Shop() {
         </select>
       </div>
 
-      <div className="product-grid">
-        {filteredProducts.map((item) => (
-          <ProductCard key={item.id} product={item} />
-        ))}
-      </div>
+      {loading && <p>Loading products...</p>}
+      {error && <p>{error}</p>}
 
-      {filteredProducts.length === 0 && (
+      {!loading && !error && (
+        <div className="product-grid">
+          {products.map((item) => (
+            <ProductCard key={item.id} product={item} />
+          ))}
+        </div>
+      )}
+
+      {!loading && !error && products.length === 0 && (
         <p>No products found.</p>
       )}
     </div>

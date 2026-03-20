@@ -1,14 +1,41 @@
 import { useParams } from "react-router-dom";
-import products from "../Data/products";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { CartContext } from "../Context/CartContext";
 
 function ProductDetails() {
   const { id } = useParams();
   const { addToCart } = useContext(CartContext);
 
-  const product = products.find(item => item.id === parseInt(id));
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(`http://localhost:5000/api/products/${id}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to fetch product");
+        }
+
+        setProduct(data.product);
+      } catch (err) {
+        setError(err.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductDetails();
+  }, [id]);
+
+  if (loading) return <h2>Loading product...</h2>;
+  if (error) return <h2>{error}</h2>;
   if (!product) return <h2>Product not found</h2>;
 
   return (
@@ -22,8 +49,8 @@ function ProductDetails() {
         <p className="detail-price">₹{product.price}</p>
 
         <p>
-          Fresh and high-quality product delivered directly to your home.
-          100% natural and premium quality.
+          {product.description ||
+            "Fresh and high-quality product delivered directly to your home. 100% natural and premium quality."}
         </p>
 
         <button onClick={() => addToCart(product)}>

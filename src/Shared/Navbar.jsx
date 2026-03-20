@@ -19,7 +19,7 @@ function Navbar() {
     <div className="navbar">
       <div className="nav-container">
 
-        <h2 className="logo">FreshMart</h2>
+        <h2 className="logo"> <img src="https://thumbs.dreamstime.com/b/vegetables-shopping-cart-trolley-grocery-logo-icon-design-vector-171090350.jpg" alt="logo" width='50px' height="50px" /> FreshMart</h2>
 
         <div className="nav-links">
           <NavLink 
