@@ -1,6 +1,6 @@
 const db = require("../config/db");
 
-const BASE_URL = process.env.BASE_URL || "https://fresh-market-jr0o.onrender.com";
+const BASE_URL = process.env.BASE_URL || "https://fresh-market-backend.onrender.com";
 
 exports.getProducts = async (req, res) => {
   try {
@@ -32,9 +32,7 @@ exports.getProducts = async (req, res) => {
 
     const updatedProducts = result.rows.map((product) => ({
       ...product,
-      image: product.image
-        ? `${BASE_URL}/uploads/${product.image}`
-        : null,
+      image: product.image ? `${BASE_URL}/uploads/${product.image}` : null,
     }));
 
     res.status(200).json({
@@ -62,9 +60,7 @@ exports.getProductsByCategory = async (req, res) => {
 
     const updatedProducts = result.rows.map((product) => ({
       ...product,
-      image: product.image
-        ? `${BASE_URL}/uploads/${product.image}`
-        : null,
+      image: product.image ? `${BASE_URL}/uploads/${product.image}` : null,
     }));
 
     res.status(200).json({
@@ -86,10 +82,7 @@ exports.getSingleProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const result = await db.query(
-      "SELECT * FROM products WHERE id = $1",
-      [id]
-    );
+    const result = await db.query("SELECT * FROM products WHERE id = $1", [id]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({
