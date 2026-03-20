@@ -8,7 +8,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://your-netlify-site.netlify.app",
+    origin: "https://freshmartshop.netlify.app",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
