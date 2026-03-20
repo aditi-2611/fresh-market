@@ -1,75 +1,107 @@
 const db = require("../config/db");
 
-exports.getProducts = async (req,res) => {
-try {
-const { category, sort, search } = req.query;
+const BASE_URL = process.env.BASE_URL || "https://fresh-market-backend.onrender.com";
 
-let query = "SELECT * FROM products WHERE 1=1";
-let values = [];
+exports.getProducts = async (req, res) => {
+  try {
+    const { category, sort, search } = req.query;
 
-if (category) {
-query += " AND category = ?";
-values.push(category);
-}
+    let query = "SELECT * FROM products WHERE 1=1";
+    const values = [];
 
-if (search) {
-query += " AND name LIKE ?";
-values.push(`%${search}%`);
-}
+    if (category) {
+      query += " AND category = ?";
+      values.push(category);
+    }
 
-if (sort === "asc") {
-query += " ORDER BY price ASC";
-} else if (sort === "desc") {
-query += " ORDER BY price DESC";
-}
+    if (search) {
+      query += " AND name LIKE ?";
+      values.push(`%${search}%`);
+    }
 
-const [products] = await db.execute(query, values);
+    if (sort === "asc") {
+      query += " ORDER BY price ASC";
+    } else if (sort === "desc") {
+      query += " ORDER BY price DESC";
+    }
 
-const updatedProducts = products.map((product) => ({
-...product,
-image: `http://localhost:5000/uploads/${product.image}`
-}));
+    const [products] = await db.execute(query, values);
 
-res.status(200).json({
-success:true,
-products:updatedProducts
-});
-} catch (error) {
-console.error("Error fetching products:", error);
-res.status(500).json({
-success:false,
-message:"Server error"
-});
-}
+    const updatedProducts = products.map((product) => ({
+      ...product,
+      image: `${BASE_URL}/uploads/${product.image}`,
+    }));
+
+    res.status(200).json({
+      success: true,
+      count: updatedProducts.length,
+      products: updatedProducts,
+    });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching products",
+    });
+  }
 };
 
-exports.getSingleProduct = async (req,res) => {
-try {
-const { id } = req.params;
+exports.getProductsByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;
 
-const [rows] = await db.execute("SELECT * FROM products WHERE id = ?", [id]);
+    const [products] = await db.execute(
+      "SELECT * FROM products WHERE category = ?",
+      [category]
+    );
 
-if (rows.length === 0) {
-return res.status(404).json({
-success:false,
-message:"Product not found"
-});
-}
+    const updatedProducts = products.map((product) => ({
+      ...product,
+      image: `${BASE_URL}/uploads/${product.image}`,
+    }));
 
-const product = {
-...rows[0],
-image: `http://localhost:5000/uploads/${rows[0].image}`
+    res.status(200).json({
+      success: true,
+      count: updatedProducts.length,
+      category,
+      products: updatedProducts,
+    });
+  } catch (error) {
+    console.error("Error fetching category products:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching category products",
+    });
+  }
 };
 
-res.status(200).json({
-success:true,
-product
-});
-} catch (error) {
-console.error("Error fetching product:", error);
-res.status(500).json({
-success:false,
-message:"Server error"
-});
-}
+exports.getSingleProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [rows] = await db.execute("SELECT * FROM products WHERE id = ?", [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    const product = {
+      ...rows[0],
+      image: `${BASE_URL}/uploads/${rows[0].image}`,
+    };
+
+    res.status(200).json({
+      success: true,
+      product,
+    });
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching single product",
+    });
+  }
 };
