@@ -16,7 +16,7 @@ function ProductDetails() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(`http://localhost:5000/api/products/${id}`);
+        const response = await fetch(`https://fresh-market-backend.onrender.com/api/products/{id}`);
         const data = await response.json();
 
         if (!response.ok) {
