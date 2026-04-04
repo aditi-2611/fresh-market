@@ -1,39 +1,29 @@
+import { Link } from "react-router-dom";
+
 function Footer() {
   return (
     <footer className="footer">
       <div className="footer-container">
-
-        <div className="footer-column">
-          <h4>Categories</h4>
-          <p>Vegetables & Fruits</p>
-          <p>Breakfast & Instant Food</p>
-          <p>Bakery & Biscuits</p>
-          <p>Atta, Rice & Dal</p>
-        </div>
-
         <div className="footer-column">
           <h4>Get to know us</h4>
-          <p>Company</p>
-          <p>About</p>
-          <p>Blog</p>
-          <p>Help Center</p>
+          <Link to="/about" className="footer-link">About</Link>
+          <Link to="/help-center" className="footer-link">Help Center</Link>
+          <Link to="/terms" className="footer-link">Terms and condition</Link>
         </div>
 
         <div className="footer-column">
           <h4>For Consumers</h4>
-          <p>Payments</p>
-          <p>Shipping</p>
-          <p>Product Returns</p>
-          <p>FAQ</p>
+          <Link to="/payments" className="footer-link">Payments</Link>
+          <Link to="/shipping" className="footer-link">Shipping</Link>
+          <Link to="/returns" className="footer-link">Product Returns</Link>
         </div>
 
         <div className="footer-column">
-          <h4>Contact</h4>
-          <p>Email: support@freshcart.com</p>
-          <p>Phone: +91 9876543210</p>
-          <p>Location: India</p>
+          <h4>Help</h4>
+          <Link to="/faqs" className="footer-link">FAQs</Link>
+          <Link to="/contact" className="footer-link">Contact Us</Link>
+          <Link to="/wallet-faqs" className="footer-link">FC Wallet FAQs</Link>
         </div>
-
       </div>
 
       <div className="footer-bottom">

@@ -1,75 +1,176 @@
 const db = require("../config/db");
 
-exports.getProducts = async (req,res) => {
-try {
-const { category, sort, search } = req.query;
+// ✅ GET all products
+// const getProducts = async (req, res) => {
+//   try {
+//     const [rows] = await db.query("SELECT * FROM products ORDER BY id DESC");
 
-let query = "SELECT * FROM products WHERE 1=1";
-let values = [];
+//     const products = rows.map((product) => ({
+//       ...product,
+//       image: product.image
+//         ? `http://localhost:5000${product.image}`
+//         : null,
+//     }));
 
-if (category) {
-query += " AND category = ?";
-values.push(category);
-}
+//     res.status(200).json({
+//       success: true,
+//       products,
+//     });
+//   } catch (error) {
+//     console.error("GET PRODUCTS ERROR:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
 
-if (search) {
-query += " AND name LIKE ?";
-values.push(`%${search}%`);
-}
 
-if (sort === "asc") {
-query += " ORDER BY price ASC";
-} else if (sort === "desc") {
-query += " ORDER BY price DESC";
-}
+const getProducts = async (req, res) => {
+  try {
+    console.log("QUERY PARAMS:", req.query);
 
-const [products] = await db.execute(query, values);
+    const { category, minPrice, maxPrice, search, sort } = req.query;
 
-const updatedProducts = products.map((product) => ({
-...product,
-image: `http://localhost:5000/uploads/${product.image}`
-}));
+    let sql = "SELECT * FROM products WHERE 1=1";
+    let values = [];
 
-res.status(200).json({
-success:true,
-products:updatedProducts
-});
-} catch (error) {
-console.error("Error fetching products:", error);
-res.status(500).json({
-success:false,
-message:"Server error"
-});
-}
+    // ✅ CATEGORY FILTER
+    if (category) {
+      sql += " AND category = ?";
+      values.push(category);
+    }
+
+    // ✅ PRICE FILTER
+    if (minPrice && maxPrice) {
+      sql += " AND price BETWEEN ? AND ?";
+      values.push(Number(minPrice), Number(maxPrice));
+    }
+
+    // ✅ SEARCH FILTER
+    if (search) {
+      sql += " AND name LIKE ?";
+      values.push(`%${search}%`);
+    }
+
+    // ✅ SORTING 🔥 (THIS WAS MISSING)
+    if (sort === "asc") {
+      sql += " ORDER BY price ASC";
+    } else if (sort === "desc") {
+      sql += " ORDER BY price DESC";
+    } else {
+      sql += " ORDER BY id DESC";
+    }
+
+    console.log("FINAL SQL:", sql);
+    console.log("VALUES:", values);
+
+    const [rows] = await db.query(sql, values);
+
+    const products = rows.map((product) => ({
+      ...product,
+      image: product.image
+        ? `http://localhost:5000${product.image}`
+        : null,
+    }));
+
+    res.status(200).json({
+      success: true,
+      products,
+    });
+  } catch (error) {
+    console.error("GET PRODUCTS ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };
 
-exports.getSingleProduct = async (req,res) => {
-try {
-const { id } = req.params;
 
-const [rows] = await db.execute("SELECT * FROM products WHERE id = ?", [id]);
 
-if (rows.length === 0) {
-return res.status(404).json({
-success:false,
-message:"Product not found"
-});
-}
 
-const product = {
-...rows[0],
-image: `http://localhost:5000/uploads/${rows[0].image}`
+// ✅ ADD product
+const addProduct = async (req, res) => {
+  try {
+    const { name, price, category, description, stock } = req.body;
+
+    const imagePath = req.file
+      ? `/uploads/images/${req.file.filename}`
+      : null;
+
+    const sql = `
+      INSERT INTO products (name, price, category, image, description, stock)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    await db.query(sql, [
+      name,
+      price,
+      category,
+      imagePath,
+      description,
+      stock,
+    ]);
+
+    res.status(201).json({
+      success: true,
+      message: "Product added successfully",
+    });
+  } catch (error) {
+    console.error("ADD PRODUCT ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };
 
-res.status(200).json({
-success:true,
-product
-});
-} catch (error) {
-console.error("Error fetching product:", error);
-res.status(500).json({
-success:false,
-message:"Server error"
-});
-}
+// ✅ UPDATE product (for your case)
+const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [rows] = await db.query(
+      "SELECT * FROM products WHERE id = ?",
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const oldProduct = rows[0];
+
+    const imagePath = req.file
+      ? `/uploads/images/${req.file.filename}`
+      : oldProduct.image;
+
+    const sql = `
+      UPDATE products 
+      SET image = ? 
+      WHERE id = ?
+    `;
+
+    await db.query(sql, [imagePath, id]);
+
+    res.json({
+      success: true,
+      message: "Product updated successfully",
+      image: imagePath,
+    });
+  } catch (error) {
+    console.error("UPDATE ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ✅ EXPORT (VERY IMPORTANT)
+module.exports = {
+  addProduct,
+  getProducts,
+  updateProduct,
 };

@@ -32,15 +32,18 @@ function Shop() {
           params.append("sort", "desc");
         }
 
-        if (searchQuery) {
+        // 🔥 BACKEND SEARCH
+        if (searchQuery.trim()) {
           params.append("search", searchQuery);
         }
 
-        const finalUrl = params.toString() ? `${url}?${params.toString()}` : url;
+        const finalUrl = params.toString()
+          ? `${url}?${params.toString()}`
+          : url;
 
         const response = await fetch(finalUrl);
         const data = await response.json();
-        console.log(data)
+
         if (!response.ok) {
           throw new Error(data.message || "Failed to fetch products");
         }
@@ -89,7 +92,7 @@ function Shop() {
       {!loading && !error && (
         <div className="product-grid">
           {products.map((item) => (
-            <ProductCard key={item.id} product={item} />
+            <ProductCard key={item._id} product={item} />
           ))}
         </div>
       )}

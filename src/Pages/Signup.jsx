@@ -1,23 +1,42 @@
-import { useState, useContext } from "react";
-import { AuthContext } from "../Context/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Signup() {
-  const { signup } = useContext(AuthContext);
-  const navigate = useNavigate();
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    signup(name, email, password);
-    navigate("/");
+    setError("");
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Signup Successful! Please login.");
+        navigate("/login");
+      } else {
+        setError(data.message || "Signup failed. Please try again.");
+      }
+    } catch (err) {
+      console.error("Signup error:", err);
+      setError("Server not reachable. Please try again.");
+    }
   };
 
   return (
-    <div className="auth-container">
+    <div className="login-container">
       <h2>Signup</h2>
 
       <form onSubmit={handleSignup}>
@@ -42,11 +61,16 @@ function Signup() {
           required
         />
 
+        {error && <p style={{ color: "red", fontSize: "14px" }}>{error}</p>}
+
         <button type="submit">Signup</button>
       </form>
 
       <p>
-        Already have an account? <Link to="/login">Login</Link>
+        Already have an account?{" "}
+        <span onClick={() => navigate("/login")} style={{ cursor: "pointer", color: "green", fontWeight: "bold" }}>
+          Login
+        </span>
       </p>
     </div>
   );

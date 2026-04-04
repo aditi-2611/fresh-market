@@ -6,6 +6,9 @@ function ProductCard({ product }) {
   const { addToCart } = useContext(CartContext);
   const [added, setAdded] = useState(false);
 
+
+console.log(product.image);
+
   const handleAddToCart = () => {
     addToCart(product);
     setAdded(true);
@@ -21,7 +24,8 @@ function ProductCard({ product }) {
       <span className="badge">10% Off</span>
 
       <Link to={`/product/${product.id}`}>
-        <img src={product.image} alt={product.name} />
+       <img src={product.image} alt={product.name} />
+
       </Link>
       
       <div className="product-info">
