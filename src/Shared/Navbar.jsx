@@ -29,7 +29,6 @@ return ( <div className="navbar"> <div className="nav-container">
       <span>FreshMart</span>
     </h2>
 
-    {/* SEARCH BAR */}
     <div className="search-wrapper">
       <input
         type="text"
@@ -40,7 +39,6 @@ return ( <div className="navbar"> <div className="nav-container">
       />
     </div>
 
-    {/* NAV LINKS */}
     <div className="nav-links">
       <NavLink
         to="/"

@@ -1,8 +1,7 @@
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+ const jwt = require("jsonwebtoken");
 const userModel = require("../models/userModel");
 
-// ================= SIGNUP =================
 exports.signup = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -27,7 +26,7 @@ exports.signup = async (req, res) => {
     });
 
   } catch (error) {
-    console.log("❌ SIGNUP ERROR:", error);
+    console.log("SIGNUP ERROR:", error);
     return res.status(500).json({
       success: false,
       message: error.message || "Signup failed",
@@ -35,19 +34,18 @@ exports.signup = async (req, res) => {
   }
 };
 
-// ================= LOGIN =================
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    console.log("👉 Login Data:", req.body);
+    console.log("Login Data:", req.body);
 
     const userData = await userModel.findUserByEmail(email);
-    console.log("👉 User Data:", userData);
+    console.log("User Data:", userData);
 
     if (!userData || userData.length === 0) {
       return res.status(404).json({ message: "User not found" });
-    }
+  }
 
     const user = userData[0];
 
@@ -55,20 +53,20 @@ exports.login = async (req, res) => {
 
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid password" });
-    }
+  }
 
     const token = jwt.sign(
       { id: user.id, email: user.email },
       "secret_key",
       { expiresIn: "1d" }
-    );
+  );
 
     return res.json({
       success: true,
       message: "Login successful",
       token,
       user: {
-        id: user.id,       // ✅ this was missing before
+        id: user.id,       
         name: user.name,
         email: user.email,
       },
@@ -81,4 +79,4 @@ exports.login = async (req, res) => {
       message: error.message || "Login failed",
     });
   }
-};
+ };

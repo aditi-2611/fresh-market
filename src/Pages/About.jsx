@@ -3,19 +3,6 @@ import React from "react";
 function About() {
   return (
     <div className="about-container">
-{/*      
-      <div className="about-sidebar">
-        <h3>About Fresh Market</h3>
-        <ul>
-          <li>What is Fresh Market?</li>
-          <li>Why shop with us?</li>
-          <li>How to order</li>
-          <li>Where we operate</li>
-          <li>Contact Us</li>
-          <li>Privacy Policy</li>
-          <li>Terms & Conditions</li>
-        </ul>
-      </div> */}
 
       <div className="about-content">
         <h1>What is Fresh Market?</h1>
@@ -43,7 +30,7 @@ function About() {
         </p>
 
         <h3>Everything You Need</h3>
-        <p>
+         <p>
           Choose from a wide range of products including fruits, vegetables,
           dairy, snacks, and more.
         </p>
@@ -59,9 +46,9 @@ function About() {
 
 
         </p>
-      </div>
+        </div>
     </div>
-  );
+    );
 }
 
 export default About;

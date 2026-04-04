@@ -1,59 +1,30 @@
 const db = require("../config/db");
-
-// ✅ GET all products
-// const getProducts = async (req, res) => {
-//   try {
-//     const [rows] = await db.query("SELECT * FROM products ORDER BY id DESC");
-
-//     const products = rows.map((product) => ({
-//       ...product,
-//       image: product.image
-//         ? `http://localhost:5000${product.image}`
-//         : null,
-//     }));
-
-//     res.status(200).json({
-//       success: true,
-//       products,
-//     });
-//   } catch (error) {
-//     console.error("GET PRODUCTS ERROR:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-
 const getProducts = async (req, res) => {
   try {
     console.log("QUERY PARAMS:", req.query);
 
     const { category, minPrice, maxPrice, search, sort } = req.query;
 
-    let sql = "SELECT * FROM products WHERE 1=1";
-    let values = [];
+      let sql = "SELECT * FROM products WHERE 1=1";
+      let values = [];
 
-    // ✅ CATEGORY FILTER
-    if (category) {
+      if (category) {
       sql += " AND category = ?";
       values.push(category);
     }
 
-    // ✅ PRICE FILTER
+   
     if (minPrice && maxPrice) {
       sql += " AND price BETWEEN ? AND ?";
       values.push(Number(minPrice), Number(maxPrice));
-    }
+  }
 
-    // ✅ SEARCH FILTER
-    if (search) {
+    if (search) 
+      {
       sql += " AND name LIKE ?";
       values.push(`%${search}%`);
     }
 
-    // ✅ SORTING 🔥 (THIS WAS MISSING)
     if (sort === "asc") {
       sql += " ORDER BY price ASC";
     } else if (sort === "desc") {
@@ -87,10 +58,6 @@ const getProducts = async (req, res) => {
   }
 };
 
-
-
-
-// ✅ ADD product
 const addProduct = async (req, res) => {
   try {
     const { name, price, category, description, stock } = req.body;
@@ -126,7 +93,6 @@ const addProduct = async (req, res) => {
   }
 };
 
-// ✅ UPDATE product (for your case)
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -168,8 +134,7 @@ const updateProduct = async (req, res) => {
   }
 };
 
-// ✅ EXPORT (VERY IMPORTANT)
-module.exports = {
+ module.exports = {
   addProduct,
   getProducts,
   updateProduct,

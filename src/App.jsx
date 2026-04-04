@@ -33,10 +33,7 @@ function App() {
     <div>
       <Navbar />
 
-      {/* <div style={{ padding: "20px", background: "#ffe082", color: "#000" }}>
-       APP IS RENDERING
-      </div> */}
-
+     
       <Routes>
         
         <Route path="/about" element={<About />} />
@@ -48,9 +45,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/wallet-faqs" element={<WalletFAQs />} />
         <Route path="/payments" element={<Payments />} />
-        {/* <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} /> */}
-
+        
 
       <Route path="/login" element={<Login />} />
   <Route path="/signup" element={<Signup />} />
